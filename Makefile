@@ -22,6 +22,10 @@ ifdef CONFIG_AO
 SRCS += audio_ao.c
 endif
 
+ifdef CONFIG_JACK
+SRCS += audio_jack.c
+endif
+
 ifdef CONFIG_PULSE
 SRCS += audio_pulse.c
 endif

@@ -35,6 +35,9 @@ extern audio_output audio_sndio;
 #ifdef CONFIG_AO
 extern audio_output audio_ao;
 #endif
+#ifdef CONFIG_JACK
+extern audio_output audio_jack;
+#endif
 #ifdef CONFIG_PULSE
 extern audio_output audio_pulse;
 #endif
@@ -55,6 +58,9 @@ static audio_output *outputs[] = {
 #endif
 #ifdef CONFIG_AO
     &audio_ao,
+#endif
+#ifdef CONFIG_JACK
+    &audio_jack,
 #endif
     &audio_dummy,
     &audio_pipe,
