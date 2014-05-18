@@ -225,6 +225,7 @@ static void start(int sample_rate) {
 }
 
 static void play(short buf[], int samples) {
+    usleep(7300);
     jack_ringbuffer_write (r_buffer, (char *)buf, samples * sizeof(jack_default_audio_sample_t));
 }
 
