@@ -434,7 +434,6 @@ static void *player_thread_func(void *arg) {
 
     signed short *inbuf, *outbuf;
     outbuf = malloc(OUTFRAME_BYTES(frame_size));
-    silence = malloc(OUTFRAME_BYTES(frame_size));
 
 #ifdef FANCY_RESAMPLING
     float *frame, *outframe;
