@@ -352,8 +352,16 @@ static short *buffer_get_frame(void) {
 
     buf_fill = seq_diff(ab_read, ab_write);
     if (buf_fill < 1 || !ab_synced) {
-        if (buf_fill < 1)
-            warn("underrun.");
+        if (buf_fill < 1){
+            if (!strcmp(config.output->name, "jack")) {
+                // wait a little bit and retry without setting buffering flag
+                usleep(250);
+                pthread_mutex_unlock(&ab_mutex);
+                return 0;
+            } else {
+                warn("underrun.");
+            }
+        }
         ab_buffering = 1;
         pthread_mutex_unlock(&ab_mutex);
         return 0;
