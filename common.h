@@ -4,8 +4,11 @@
 #include <openssl/rsa.h>
 #include <stdint.h>
 #include <sys/socket.h>
+#include <jack/ringbuffer.h>
 #include "audio.h"
 #include "mdns.h"
+
+jack_ringbuffer_t *r_buffer;
 
 // struct sockaddr_in6 is bigger than struct sockaddr. derp
 #ifdef AF_INET6

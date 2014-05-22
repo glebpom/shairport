@@ -37,6 +37,7 @@
 #include <assert.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <jack/ringbuffer.h>
 
 #include "common.h"
 #include "player.h"
@@ -353,14 +354,10 @@ static short *buffer_get_frame(void) {
     buf_fill = seq_diff(ab_read, ab_write);
     if (buf_fill < 1 || !ab_synced) {
         if (buf_fill < 1){
-            if (!strcmp(config.output->name, "jack")) {
-                // wait a little bit and retry without setting buffering flag
-                usleep(250);
-                pthread_mutex_unlock(&ab_mutex);
-                return 0;
-            } else {
-                warn("underrun.");
-            }
+            jack_ringbuffer_data_t rb_data[2];
+            jack_ringbuffer_get_read_vector(r_buffer, rb_data);
+            printf("len in RB = %zu\n", rb_data[0].len);
+            warn("underrun.");
         }
         ab_buffering = 1;
         pthread_mutex_unlock(&ab_mutex);

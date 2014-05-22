@@ -37,7 +37,6 @@
 unsigned long counter=0;
 jack_port_t *left, *right;
 jack_client_t *client;
-jack_ringbuffer_t *r_buffer;
 
 // #include <pulse/simple.h>
 // #include <pulse/error.h>
@@ -117,11 +116,11 @@ int jack_callback (jack_nframes_t nframes, void *arg)
         if (nframes_left > 0) {
                 // write silence
             memset(out1 + (nframes - nframes_left), 0, (nframes_left) * sizeof(jack_default_audio_sample_t));
-            memset(out2 + (nframes - nframes_left), 0, (nframes_left) * sizeof(jack_default_audio_sample_t));       
+            memset(out2 + (nframes - nframes_left), 0, (nframes_left) * sizeof(jack_default_audio_sample_t));
         }
     }
 
-    return 0;    
+    return 0;
 }
 
 static int init(int argc, char **argv) {
@@ -132,7 +131,7 @@ static int init(int argc, char **argv) {
     jack_status_t status;
     const char *data = NULL; //FIXME: need to pass data to callback?
 
-    r_buffer = jack_ringbuffer_create(sizeof(jack_default_audio_sample_t) * 44100 * 2*10);
+    r_buffer = jack_ringbuffer_create(sizeof(jack_default_audio_sample_t) * 44100 * 2 * 2);
 
 //    memset(r_buffer->buf, 0, r_buffer->size);
 
@@ -225,7 +224,13 @@ static void start(int sample_rate) {
 }
 
 static void play(short buf[], int samples) {
+    struct timeval tm, tm1;
+    gettimeofday( &tm, NULL );
     jack_ringbuffer_write (r_buffer, (char *)buf, samples * sizeof(jack_default_audio_sample_t));
+    double diff ;
+    gettimeofday( &tm1, NULL );
+    diff = (double)tm1.tv_sec + (double)tm1.tv_usec / 1000000.0 - ((double)tm.tv_sec + (double)tm.tv_usec / 1000000.0);
+    usleep(( ( (double)samples / 44100.0 ) - diff ) * 1000000.0 - 100);
 }
 
 static void stop(void) {
