@@ -38,11 +38,6 @@ unsigned long counter=0;
 jack_port_t *left, *right;
 jack_client_t *client;
 
-// #include <pulse/simple.h>
-// #include <pulse/error.h>
-
-// static pa_simple *pa_dev = NULL;
-// static int pa_error;
 
 static void help(void) {
     printf("    -c client_name      set the jack client name\n"
@@ -125,13 +120,12 @@ int jack_callback (jack_nframes_t nframes, void *arg)
 
 static int init(int argc, char **argv) {
     const char **ports;
-    const char *client_name="shairport"; //FIXME
+    const char *client_name = "shairport"; //FIXME
     const char *server_name = NULL;
     jack_options_t options = JackNullOption;
     jack_status_t status;
-    const char *data = NULL; //FIXME: need to pass data to callback?
 
-    r_buffer = jack_ringbuffer_create(sizeof(jack_default_audio_sample_t) * 44100 * 2 * 2);
+    r_buffer = jack_ringbuffer_create(sizeof(jack_default_audio_sample_t) * 44100 * 2 * 1); //1 second buffer
 
 //    memset(r_buffer->buf, 0, r_buffer->size);
 
@@ -213,8 +207,8 @@ static int init(int argc, char **argv) {
 }
 
 static void deinit(void) {
-    if (client)
-         jack_client_close (client);
+    jack_ringbuffer_free(r_buffer);
+    jack_client_close (client);
     client = NULL;  
 }
 
@@ -234,8 +228,7 @@ static void play(short buf[], int samples) {
 }
 
 static void stop(void) {
-    // if (pa_simple_drain(pa_dev, &pa_error) < 0)
-    //     fprintf(stderr, __FILE__": pa_simple_drain() failed: %s\n", pa_strerror(pa_error));
+    fprintf(stderr, "playbak stoped");
 }
 
 audio_output audio_jack = {
