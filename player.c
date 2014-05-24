@@ -453,7 +453,9 @@ static void *player_thread_func(void *arg) {
 
     while (!please_stop) {
         inbuf = buffer_get_frame();
-        if (inbuf){
+        if (!inbuf){
+            usleep(10000); 
+        } else {
 #ifdef FANCY_RESAMPLING
             if (fancy_resampling) {
                 int i;
