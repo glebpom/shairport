@@ -37,7 +37,6 @@
 #include <assert.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include <jack/ringbuffer.h>
 
 #include "common.h"
 #include "player.h"
@@ -353,12 +352,8 @@ static short *buffer_get_frame(void) {
 
     buf_fill = seq_diff(ab_read, ab_write);
     if (buf_fill < 1 || !ab_synced) {
-        if (buf_fill < 1){
-            jack_ringbuffer_data_t rb_data[2];
-            jack_ringbuffer_get_read_vector(r_buffer, rb_data);
-            printf("len in RB = %zu\n", rb_data[0].len);
+        if (buf_fill < 1)
             warn("underrun.");
-        }
         ab_buffering = 1;
         pthread_mutex_unlock(&ab_mutex);
         return 0;
@@ -459,7 +454,6 @@ static void *player_thread_func(void *arg) {
     while (!please_stop) {
         inbuf = buffer_get_frame();
         if (inbuf){
-
 #ifdef FANCY_RESAMPLING
             if (fancy_resampling) {
                 int i;
@@ -480,7 +474,6 @@ static void *player_thread_func(void *arg) {
 
             config.output->play(outbuf, play_samples);
         }
-
     }
 
     return 0;

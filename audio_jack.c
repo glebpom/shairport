@@ -34,7 +34,7 @@
 #include <jack/ringbuffer.h>
 
 
-unsigned long counter=0;
+jack_ringbuffer_t *r_buffer;
 jack_port_t *left, *right;
 jack_client_t *client;
 
@@ -71,7 +71,7 @@ int jack_callback (jack_nframes_t nframes, void *arg)
     jack_nframes_t nframes_left = nframes;
     int wrotebytes = 0;
 
-    if (jack_ringbuffer_read_space(r_buffer) == 0) {
+    if (jack_ringbuffer_read_space(r_buffer) < 10000) {
         // just write silence
         memset(out1, 0, nframes * sizeof(jack_default_audio_sample_t));
         memset(out2, 0, nframes * sizeof(jack_default_audio_sample_t)); 
@@ -228,7 +228,7 @@ static void play(short buf[], int samples) {
 }
 
 static void stop(void) {
-    fprintf(stderr, "playbak stoped");
+    fprintf(stderr, "playback stoped");
 }
 
 audio_output audio_jack = {
