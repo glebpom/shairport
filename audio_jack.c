@@ -125,7 +125,7 @@ static int init(int argc, char **argv) {
     jack_options_t options = JackNullOption;
     jack_status_t status;
 
-    r_buffer = jack_ringbuffer_create(sizeof(jack_default_audio_sample_t) * 44100 * 2 * 1); //1 second buffer
+    r_buffer = jack_ringbuffer_create(sizeof(jack_default_audio_sample_t) * 44100 * 2 * 5); //5 seconds buffer
 
 //    memset(r_buffer->buf, 0, r_buffer->size);
 
