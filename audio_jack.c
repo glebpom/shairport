@@ -51,7 +51,7 @@ static void help(void) {
 
 #define SAMPLE_MAX_16BIT  32768.0f
 
-void sample_move_dS_s16_volume(jack_default_audio_sample_t* dst, char *src, jack_nframes_t nsamples, unsigned long src_skip, float volume) 
+void sample_move_dS_s16_volume(jack_default_audio_sample_t* dst, char *src, jack_nframes_t nsamples, unsigned long src_skip, float volume)
  {
     /* ALERT: signed sign-extension portability !!! */
     while (nsamples--) {
@@ -59,7 +59,7 @@ void sample_move_dS_s16_volume(jack_default_audio_sample_t* dst, char *src, jack
         dst++;
         src += src_skip;
     }
- }  
+ }
 
 int jack_callback (jack_nframes_t nframes, void *arg)
 {
@@ -74,7 +74,7 @@ int jack_callback (jack_nframes_t nframes, void *arg)
     if (jack_ringbuffer_read_space(r_buffer) < 10000) {
         // just write silence
         memset(out1, 0, nframes * sizeof(jack_default_audio_sample_t));
-        memset(out2, 0, nframes * sizeof(jack_default_audio_sample_t)); 
+        memset(out2, 0, nframes * sizeof(jack_default_audio_sample_t));
     } else {
 
         jack_ringbuffer_data_t rb_data[2];
@@ -87,17 +87,17 @@ int jack_callback (jack_nframes_t nframes, void *arg)
             towrite_frames = min(towrite_frames, nframes_left);
 
             sample_move_dS_s16_volume(
-                out1 + (nframes - nframes_left), 
-                (char *) rb_data[0].buf, 
-                towrite_frames, 
-                sizeof(short) * 2, 
+                out1 + (nframes - nframes_left),
+                (char *) rb_data[0].buf,
+                towrite_frames,
+                sizeof(short) * 2,
                 1.0f
             );
             sample_move_dS_s16_volume(
-                out2 + (nframes - nframes_left), 
-                (char *) rb_data[0].buf + sizeof(short), 
-                towrite_frames, 
-                sizeof(short) * 2, 
+                out2 + (nframes - nframes_left),
+                (char *) rb_data[0].buf + sizeof(short),
+                towrite_frames,
+                sizeof(short) * 2,
                 1.0f);
 
             wrotebytes = towrite_frames * sizeof(short) * 2;
@@ -190,7 +190,7 @@ static int init(int argc, char **argv) {
     }
 
     jack_free (ports);
-//    
+//
 //    /* install a signal handler to properly quits jack client */
 //#ifdef WIN32
 //    signal(SIGINT, signal_handler);
@@ -209,7 +209,7 @@ static int init(int argc, char **argv) {
 static void deinit(void) {
     jack_ringbuffer_free(r_buffer);
     jack_client_close (client);
-    client = NULL;  
+    client = NULL;
 }
 
 static void start(int sample_rate) {
@@ -220,7 +220,11 @@ static void start(int sample_rate) {
 static void play(short buf[], int samples) {
     struct timeval tm, tm1;
     gettimeofday( &tm, NULL );
-    jack_ringbuffer_write (r_buffer, (char *)buf, samples * sizeof(jack_default_audio_sample_t));
+    int buf_length_bytes = samples * sizeof(jack_default_audio_sample_t);
+    int buf_wrote_bytes = jack_ringbuffer_write (r_buffer, (char *)buf, buf_length_bytes);
+    if (buf_wrote_bytes < buf_length_bytes) {
+        die("could not write all bytes!");
+    }
     double diff ;
     gettimeofday( &tm1, NULL );
     diff = (double)tm1.tv_sec + (double)tm1.tv_usec / 1000000.0 - ((double)tm.tv_sec + (double)tm.tv_usec / 1000000.0);
