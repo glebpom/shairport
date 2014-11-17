@@ -220,10 +220,11 @@ static void start(int sample_rate) {
 static void play(short buf[], int samples) {
     struct timeval tm, tm1;
     gettimeofday( &tm, NULL );
-    int buf_length_bytes = samples * sizeof(jack_default_audio_sample_t);
-    int buf_wrote_bytes = jack_ringbuffer_write (r_buffer, (char *)buf, buf_length_bytes);
-    if (buf_wrote_bytes < buf_length_bytes) {
-        die("could not write all bytes!");
+    int buf_length_bytes = samples * sizeof(jack_default_audio_sample_t),
+        buf_wrote_bytes = 0;
+    while (buf_wrote_bytes < buf_length_bytes) {
+        buf_wrote_bytes += jack_ringbuffer_write(r_buffer, (char *)buf, buf_length_bytes - buf_wrote_bytes);
+        usleep(100); //sleep a little bit to not kill the CPU
     }
     double diff ;
     gettimeofday( &tm1, NULL );
