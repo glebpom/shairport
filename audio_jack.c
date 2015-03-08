@@ -120,16 +120,37 @@ int jack_callback (jack_nframes_t nframes, void *arg)
 
 static int init(int argc, char **argv) {
     const char **ports;
-    const char *client_name = "shairport"; //FIXME
+    const char *client_name = "shairport";
     const char *server_name = NULL;
+
     jack_options_t options = JackNullOption;
     jack_status_t status;
 
+    optind = 1; // optind=0 is equivalent to optind=1 plus special behaviour
+    argv--;     // so we shift the arguments to satisfy getopt()
+    argc++;
+
+
+    // some platforms apparently require optreset = 1; - which?
+    int opt;
+    while ((opt = getopt(argc, argv, "s:c:")) > 0) {
+        switch (opt) {
+            case 's':
+                server_name = optarg;
+                break;
+            case 'c':
+                client_name = optarg;
+                break;
+            default:
+                help();
+                die("Invalid audio option -%c specified", opt);
+        }
+    }
+
+    if (optind < argc)
+        die("Invalid audio argument: %s", argv[optind]);
+
     r_buffer = jack_ringbuffer_create(sizeof(jack_default_audio_sample_t) * 44100 * 2 * 5); //5 seconds buffer
-
-//    memset(r_buffer->buf, 0, r_buffer->size);
-
-//TODO: parse client name and server name
 
     /* open a client connection to the JACK server */
 
@@ -223,7 +244,6 @@ static void play(short buf[], int samples) {
     int buf_length_bytes = samples * sizeof(jack_default_audio_sample_t);
     if( jack_ringbuffer_write_space(r_buffer) <
         buf_length_bytes ) {
-        fprintf(stderr, "ringbuffer overflow");
         return; // buffer overflow
     }
     jack_ringbuffer_write(r_buffer, (char *)buf, buf_length_bytes);
