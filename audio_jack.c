@@ -71,7 +71,7 @@ int jack_callback (jack_nframes_t nframes, void *arg)
     jack_nframes_t nframes_left = nframes;
     int wrotebytes = 0;
 
-    if (jack_ringbuffer_read_space(r_buffer) < 10000) {
+    if (jack_ringbuffer_read_space(r_buffer) < 20000) {
         // just write silence
         memset(out1, 0, nframes * sizeof(jack_default_audio_sample_t));
         memset(out2, 0, nframes * sizeof(jack_default_audio_sample_t));
@@ -150,7 +150,7 @@ static int init(int argc, char **argv) {
     if (optind < argc)
         die("Invalid audio argument: %s", argv[optind]);
 
-    r_buffer = jack_ringbuffer_create(sizeof(jack_default_audio_sample_t) * 44100 * 2 * 5); //5 seconds buffer
+    r_buffer = jack_ringbuffer_create(sizeof(jack_default_audio_sample_t) * 44100 * 2 * 10); //10 seconds buffer
 
     /* open a client connection to the JACK server */
 
